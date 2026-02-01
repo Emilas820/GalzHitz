@@ -4,108 +4,103 @@ using UnityEngine;
 
 public class Player : MonoBehaviour
 {
-    [Header("컴포넌트")]
+    // ... (기존 변수들 유지) ...
     public Rigidbody2D rd;
 
-    [Header("스테이터스")]
-    
-    [SerializeField] float moveSpeed = 2.0f;
-    [SerializeField] float maxHP = 5.0f;
-    [SerializeField] float hp = 5.0f;
-    public float p_HP
-    {
-        get => hp;
-        set => hp = Mathf.Clamp(value, 0, maxHP); // 외부에서 어떤 값을 넣든 0~maxHP 사이로 고정
-    }
-
     [Header("가방 인벤토리")]
-    public List<BagData> myBags; // 인스펙터에서 던질 수 있는 가방 데이터들을 드래그해서 넣어줍니다.
-    
-    private BagData selectedBag; // 현재 던지려고 선택한 가방
-    public GameObject firePoint;    // 발사 포인트
-    private int selectedIndex = 0;
+    public List<BagData> myBags;
+    private BagData selectedBag;
+    public Transform firePoint;
 
     [Header("발사 정보")]
-    [SerializeField] float minAng = 0f; // 최소 각
-    [SerializeField] float maxAng = 90f; // 최대 각
-    [SerializeField] float minPow = 0f; // 최소 강도
-    [SerializeField] float maxPow = 20f; // 최대 강도
-    public float throwAng = 0;  // 발사 각
-    public float throwPow = 0;  // 발사 강도
-
-
-    void FixedUpdate()
-    {
-        Movement();
-    }
-
-    void Movement()
-    {
-        float h = Input.GetAxisRaw("Horizontal"); 
-
-        // 현재 속도와 입력값이 같으면 굳이 새로 대입하지 않음 (떨림 방지)
-        if (Mathf.Approximately(rd.linearVelocity.x, h * moveSpeed)) return;
-
-        rd.linearVelocity = new Vector2(h * moveSpeed, rd.linearVelocity.y);
-    }
+    [SerializeField] float minAng = 0f;
+    [SerializeField] float maxAng = 90f;
+    [SerializeField] float minPow = 0f;
+    [SerializeField] float maxPow = 20f;
     
-    void OnCollisionEnter2D(Collision2D collision)
+    // 실제 적용될 값
+    public float currentAngle { get; private set; }
+    public float currentPower { get; private set; }
+
+    [Header("연결")]
+    public TrajectoryLine trajectory; // ★ 인스펙터에서 TrajectoryLine 오브젝트 연결
+
+    // ... (Movement, Start 등 기존 로직 유지) ...
+
+    // ★ 1. 매니저가 호출할 조준 함수 (0~1 비율을 받음)
+    public void UpdateAim(float angleRatio, float powerRatio)
     {
-        if(collision.gameObject.TryGetComponent<Bag>(out var damage))
+        // 1. 비율을 실제 게임 수치로 변환 (Lerp)
+        // (currentAngle, currentPower 변수가 선언되어 있어야 합니다)
+        currentAngle = Mathf.Lerp(minAng, maxAng, angleRatio);
+        currentPower = Mathf.Lerp(minPow, maxPow, powerRatio);
+
+        // 2. 가방의 물리 정보 가져오기 (무게, 저항, 중력)
+        // 안전장치: 선택된 가방이 없으면 첫 번째 가방 사용
+        if (selectedBag == null && myBags.Count > 0) selectedBag = myBags[0];
+
+        float bagMass = 1.0f;
+        float bagDrag = 0.0f;
+        float bagGravity = 1.0f;
+
+        if (selectedBag != null && selectedBag.bagPrefab != null)
         {
-            // + 피격 애니메이션
-            // + 데미지 적용
+            Rigidbody2D rb = selectedBag.bagPrefab.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                bagMass = rb.mass;
+                bagGravity = rb.gravityScale;
+                
+                // 유니티 버전에 따라 아래 중 하나를 사용하세요.
+                bagDrag = rb.linearDamping;
+            }
+        }
+
+        // 3. 초기 속도(Velocity) 계산
+        // ForceMode2D.Impulse 공식: V = F / m
+        float rad = currentAngle * Mathf.Deg2Rad;
+        Vector2 dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+        
+        // 힘(Power)을 질량(Mass)으로 나누어야 실제 날아가는 속도가 됩니다.
+        Vector2 startVelocity = dir * (currentPower / bagMass); 
+
+        // 4. 궤적 그리기 요청 (변경된 함수 호출)
+        if (trajectory != null)
+        {
+            // 이제 단순히 위치만 주는 게 아니라, 물리 속성까지 다 줍니다.
+            trajectory.DrawSimulatedPath(firePoint.position, startVelocity, bagDrag, bagGravity);
         }
     }
 
-    void PlayHitEffect()
+    // ★ 2. 실제 발사 함수
+    public void Throw()
     {
-        // 피격 이펙트 전용
-    }
+        // 궤적 지우기
+        if (trajectory != null) trajectory.ClearPath();
 
-
-
-    // 애니메이션 메소드 구현 위치
-    // trigger 파라미터 "state", float 파라미터 "speed"사용.
-    // state는 입력 신호를 통해, speed는 플레이어 속도값을 받아 적용.
-    // "Idle" -> "Throw" 변환은 Throw() 실행 시 수행할 예정.
-
-
-    // state == trigger off: Idle
-    // state == trigger on: Throw
-    // speed < 0.1 : Idle
-    // speed > 0.1 && speed< 0.5  : Walk
-    // speed > 0.5 : Run
-
-
-    // ===========================================
-    // ============= 플레이어 공격 로직 =============
-    // ===========================================
-
-    void Throw()
-    {
+        if (myBags.Count > 0 && selectedBag == null) selectedBag = myBags[0]; // 임시 안전장치
         if (selectedBag == null) return;
 
-        // 1. 데이터에 등록된 프리팹을 소환합니다.
-        GameObject bagObj = Instantiate(selectedBag.bagPrefab, firePoint.transform.position, Quaternion.identity);
+        GameObject bagObj = Instantiate(selectedBag.bagPrefab, firePoint.position, Quaternion.identity);
         
-        // 2. 소환된 가방 스크립트에 데이터를 주입합니다.
         Bag bagScript = bagObj.GetComponent<Bag>();
-        if (bagScript != null)
-        {
-            bagScript.Setup(selectedBag); // 가방이 자기 데이터(관통 횟수 등)를 알게 합니다.
-        }
+        if (bagScript != null) bagScript.Setup(selectedBag);
 
-        // 3. 카메라 타겟 변경 (아까 논의한 부분)
-        if (CameraManager.Instance != null)
-        {
-            CameraManager.Instance.SetTarget(bagObj.transform);
-        }
+        if (CameraManager.Instance != null) CameraManager.Instance.SetTarget(bagObj.transform);
         
-        // 4. 물리 발사 실행
+        // 계산된 currentAngle, currentPower 사용
         Rigidbody2D bagRd = bagObj.GetComponent<Rigidbody2D>();
-        float rad = throwAng * Mathf.Deg2Rad;
+    
+        // 1. 이동 경로 결정 (이 힘이 궤도를 만듭니다)
+        float rad = currentAngle * Mathf.Deg2Rad;
         Vector2 dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
-        bagRd.AddForce(dir * throwPow, ForceMode2D.Impulse);
+        
+        // ForceMode2D.Impulse를 사용하여 초기 속도를 즉시 부여합니다.
+        bagRd.AddForce(dir * currentPower, ForceMode2D.Impulse);
+
+        // 2. ★ 순수 회전만 추가 (AddTorque)
+        // AddTorque는 가방의 중심축을 기준으로 회전만 시키므로 이동 경로를 바꾸지 않습니다.
+        float randomRotation = UnityEngine.Random.Range(0.1f, 0.5f); // 던질 때마다 다른 회전감
+        bagRd.AddTorque(randomRotation, ForceMode2D.Impulse);
     }
 }

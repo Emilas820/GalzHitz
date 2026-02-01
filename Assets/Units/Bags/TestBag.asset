@@ -13,6 +13,6 @@ MonoBehaviour:
   m_Name: TestBag
   m_EditorClassIdentifier: 
   bagName: Test Bag
-  prefab: {fileID: 7395751756218625456, guid: 982743f89029b0445ba5b131593fc34f, type: 3}
+  bagPrefab: {fileID: 7395751756218625456, guid: 982743f89029b0445ba5b131593fc34f, type: 3}
   damage: 0
   type: 0
