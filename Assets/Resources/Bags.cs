@@ -9,7 +9,7 @@ public enum BagType
     MultiHit    // 다단 히트
 }
 
-[CreateAssetMenu(fileName = "New Bag", menuName = "Bag/BagData")]
+[CreateAssetMenu(fileName = "New Bag", menuName = "Game Data/BagData")]
 public class BagData : ScriptableObject
 {
     public string bagName;      // 가방 이름
