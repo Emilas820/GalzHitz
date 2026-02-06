@@ -21,6 +21,11 @@ public class Player : MonoBehaviour
     [SerializeField] float maxAng = 90f;
     [SerializeField] float minPow = 0f;
     [SerializeField] float maxPow = 20f;
+
+    public float MinAng => minAng;
+    public float MaxAng => maxAng;
+    public float MinPow => minPow;
+    public float MaxPow => maxPow;
     
     // 실제 적용될 값
     public float currentAngle { get; private set; }
@@ -30,6 +35,20 @@ public class Player : MonoBehaviour
     public TrajectoryLine trajectory; // ★ 인스펙터에서 TrajectoryLine 오브젝트 연결
 
     // 매니저가 호출할 조준 함수 (0~1 비율을 받음)
+
+    void Awake()
+    {
+        myBattleUnit = GetComponent<BattleUnit>();
+        myStats = GetComponent<UnitStats>();
+    }
+
+    // Player.cs
+    void Start()
+    {
+        // 시작하자마자 인벤토리의 첫 번째 가방을 손에 듭니다.
+        if (myBags.Count > 0) selectedBag = myBags[0];
+    }
+
     public void UpdateAim(float angleRatio, float powerRatio)
     {
         // 1. 비율을 실제 게임 수치로 변환 (Lerp)
@@ -73,6 +92,41 @@ public class Player : MonoBehaviour
             trajectory.DrawSimulatedPath(firePoint.position, startVelocity, bagDrag, bagGravity);
         }
     }
+
+    // ★ AI 전용: 비율(0~1)이 아니라 계산된 실제 각도와 파워를 넣는 함수
+    public void UpdateAimDirect(float exactAngle, float exactPower)
+    {
+        // 범위 제한 (Clamp)
+        currentAngle = Mathf.Clamp(exactAngle, minAng, maxAng);
+        currentPower = Mathf.Clamp(exactPower, minPow, maxPow);
+
+        // 2. 가방 물리 정보 가져오기 (기존 로직 재사용을 위해 함수 분리 추천하지만, 일단 복붙)
+        if (selectedBag == null && myBags.Count > 0) selectedBag = myBags[0];
+
+        float bagMass = 1.0f;
+        float bagDrag = 0.0f;
+        float bagGravity = 1.0f;
+
+        if (selectedBag != null && selectedBag.bagPrefab != null)
+        {
+            Rigidbody2D rb = selectedBag.bagPrefab.GetComponent<Rigidbody2D>();
+            if (rb != null)
+            {
+                bagMass = rb.mass;
+                bagGravity = rb.gravityScale;
+                bagDrag = rb.linearDamping; 
+            }
+        }
+
+        // 3. 궤적 계산을 위한 속도
+        float rad = currentAngle * Mathf.Deg2Rad;
+        Vector2 dir = new Vector2(Mathf.Cos(rad), Mathf.Sin(rad));
+        Vector2 startVelocity = dir * (currentPower / bagMass); 
+
+        // 4. 궤적 그리기 (AI는 궤적을 안 보여주고 싶다면 이 부분은 생략 가능)
+        // if (trajectory != null) trajectory.DrawSimulatedPath(firePoint.position, startVelocity, bagDrag, bagGravity);
+    }
+
 
     // ★ 2. 실제 발사 함수
     public void Throw()
