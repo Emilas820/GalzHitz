@@ -14,7 +14,6 @@ public class UnitStats : MonoBehaviour
     // 죽었는지 확인
     public bool IsDead => currentHp <= 0;
 
-    // ★ 핵심: 데이터 파일(CharacterData)을 받아서 내 능력치로 세팅하는 함수
     public void Setup(Characters data)
     {
         this.unitName = data.characterName;
@@ -22,8 +21,7 @@ public class UnitStats : MonoBehaviour
         this.currentHp = data.maxHp; // 시작할 땐 풀피
         this.atk = data.atk;
         this.def = data.def;
-
-        this.spd = Random.Range(10, 20); // (임시 테스트용 랜덤 속도)
+        this.spd = data.spd;
 
         Debug.Log($"[{unitName}] 스탯 세팅 완료! HP: {currentHp}");
     }

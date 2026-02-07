@@ -13,7 +13,7 @@ GameObject:
   - component: {fileID: 8742851820205310445}
   - component: {fileID: 6302515234421926673}
   - component: {fileID: 3275991124850091011}
-  m_Layer: 0
+  m_Layer: 8
   m_Name: test bag
   m_TagString: Bag
   m_Icon: {fileID: 0}
@@ -124,7 +124,7 @@ BoxCollider2D:
   m_UsedByEffector: 0
   m_CompositeOperation: 0
   m_CompositeOrder: 0
-  m_Offset: {x: 0.006480336, y: -0.0064801574}
+  m_Offset: {x: 0.006480336, y: -0.0027030408}
   m_SpriteTilingProperty:
     border: {x: 0, y: 0, z: 0, w: 0}
     pivot: {x: 0.5, y: 0.5}
@@ -134,7 +134,7 @@ BoxCollider2D:
     drawMode: 0
     adaptiveTiling: 0
   m_AutoTiling: 0
-  m_Size: {x: 0.97611594, y: 0.66506267}
+  m_Size: {x: 0.97611594, y: 0.6726169}
   m_EdgeRadius: 0
 --- !u!50 &6302515234421926673
 Rigidbody2D:
@@ -175,3 +175,4 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: cab3a0691f3283440af8de8e6bc74ab2, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  damageEffect: {fileID: 8176850701479282271, guid: b219c04f384e7f345bb8ae1fef443965, type: 3}

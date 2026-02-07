@@ -12,6 +12,9 @@ public class AIController : MonoBehaviour
     private Player myBody;
     private BattleUnit myUnit;
 
+    // 좌 우 판정
+    private bool isRight;
+
     void Awake()
     {
         myBody = GetComponent<Player>(); 
@@ -26,12 +29,26 @@ public class AIController : MonoBehaviour
 
     IEnumerator ThinkAndAction()
     {
-        // 1. 고민 (랜덤 시간)
+        // 고민 (랜덤 시간)
         float thinkTime = Random.Range(1.0f, 2.5f);
         yield return new WaitForSeconds(thinkTime);
 
-        // 2. 타겟 찾기
+        // 타겟 찾기
         Transform target = FindTarget();
+
+        // 방향 결정
+
+        if (target.position.x < transform.position.x) 
+        {
+            isRight = false;
+            transform.localScale = new Vector3(-1, 1, 1); // 왼쪽 보기
+        }
+        else 
+        {
+            isRight = true;
+            transform.localScale = new Vector3(1, 1, 1);  // 오른쪽 보기
+        }
+
         if (target == null) 
         {
             Debug.Log("AI: 타겟 없음");
@@ -39,10 +56,12 @@ public class AIController : MonoBehaviour
             yield break;
         }
 
-        // 3. 탄도학 계산 & 조준 명령
+
+
+        // 탄도학 계산 & 조준 명령
         CalculateAndAim(target);
 
-        // 4. 잠시 대기 후 발사 명령
+        // 잠시 대기 후 발사 명령
         yield return new WaitForSeconds(0.5f);
         myBody.Throw(); // ★ 몸체에게 발사 명령!
     }
@@ -94,15 +113,12 @@ public class AIController : MonoBehaviour
         float finalPower = calcPower + Random.Range(-errorRange * 0.5f, errorRange * 0.5f);
 
         // 방향 뒤집기 (왼쪽을 보고 있다면)
-        if (target.position.x < transform.position.x)
+        if (!isRight)
         {
-             // Player.cs에서 각도를 단순히 변환만 하므로,
-             // 180도 - 각도 처리를 하거나, Player가 flip 로직이 있다면 그것을 따라야 함.
-             // 여기선 단순하게 각도만 보정: 180 - finalAngle
              finalAngle = 180f - finalAngle;
         }
 
-        // ★ 몸체에게 입력 (UpdateAimDirect 호출)
+        // 몸체에게 입력 (UpdateAimDirect 호출)
         myBody.UpdateAimDirect(finalAngle, finalPower);
     }
 }

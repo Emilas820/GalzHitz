@@ -28,7 +28,7 @@ public class TrajectoryLine : MonoBehaviour
         Vector2 currentVel = startVelocity;
         Vector2 gravity = Physics2D.gravity * gravityScale;
 
-        // 1. 시뮬레이션 돌리기
+        // 시뮬레이션 돌리기
         for (int i = 0; i < maxSteps; i++)
         {
             // --- 물리 계산 ---

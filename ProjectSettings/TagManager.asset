@@ -6,6 +6,7 @@ TagManager:
   tags:
   - Bag
   - TankHealth
+  - Ground
   layers:
   - Default
   - TransparentFX
@@ -13,9 +14,9 @@ TagManager:
   - 
   - Water
   - UI
-  - 
-  - 
-  - 
+  - Ground
+  - Unit
+  - Bag
   - 
   - 
   - 
@@ -43,8 +44,14 @@ TagManager:
   - name: Default
     uniqueID: 0
     locked: 0
+  - name: Background
+    uniqueID: 1850613857
+    locked: 0
   - name: Trajectory
     uniqueID: 3485612665
+    locked: 0
+  - name: Player
+    uniqueID: 3972195191
     locked: 0
   - name: UI
     uniqueID: 1021483117

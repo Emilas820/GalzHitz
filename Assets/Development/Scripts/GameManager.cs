@@ -5,6 +5,7 @@ using UnityEngine;
 // 스테이트 머신 - 턴 관리
 public enum TurnState
 {
+    None,           // 0. 초기 진입
     Init,           // 1. 게임 초기화 (데이터 로드)
     TurnStart,      // 2. 턴 시작 연출 (카메라 이동, 바람 적용)
     PlayerAiming,   // 3. 플레이어 조준 (입력 대기)
@@ -21,6 +22,7 @@ public class GameManager : MonoBehaviour
     public static GameManager Instance;
 
     [Header("턴 관리")]
+    public int currentRound = 1;    // 턴 카운트
     public BattleUnit currentActor;
     public TurnState currentState; // 스테이트 머신
     public List<BattleUnit> allUnits = new List<BattleUnit>(); // 전체 참가자 명단
@@ -109,6 +111,7 @@ public class GameManager : MonoBehaviour
 
     IEnumerator SetupBattle()
     {
+        Debug.Log(">>> [1] 전투 설정 시작 (SetupBattle 진입)");
         allUnits.Clear();
 
         // 1. 데이터 가져오기 (배달부와 표지판 찾기)
@@ -214,17 +217,58 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // [추가] 살아있는 유닛 수를 세서 게임 종료 여부 판단
+    // 리턴값: 0=계속, 1=플레이어 승, 2=적 승(플레이어 패)
+    int CheckGameEnd()
+    {
+        int alivePlayers = 0;
+        int aliveEnemies = 0;
+
+        foreach (var unit in allUnits)
+        {
+            if (unit.isDead) continue; // 죽은 놈은 카운트 X
+
+            if (unit.myTeam == Team.Player) alivePlayers++;
+            else if (unit.myTeam == Team.Enemy) aliveEnemies++;
+        }
+
+        // 1. 내가 다 죽었으면 -> 패배
+        if (alivePlayers == 0) return 2;
+        
+        // 2. 적이 다 죽었으면 -> 승리
+        if (aliveEnemies == 0) return 1;
+
+        // 3. 둘 다 살아있으면 -> 계속 진행
+        return 0; 
+    }
+
     // [Resolution] 결과 확인 후 다음 턴으로
     IEnumerator ResolutionProcess()
-    {
-        yield return new WaitForSeconds(1.5f); // 폭발 연출 대기
+        {
+            // 각종 연출 대기
+            yield return new WaitForSeconds(3.0f);
+            // 작동 중지 신호 받는 방식으로 차후 변경
 
-        // 승패 조건 체크 (나중에 추가)
-        // if (CheckGameEnd()) SetState(TurnState.GameOver);
-        // else
-        
-        StartNextTurn(); // 다음 사람 호출
-    }
+            // 승패 판정 (심판의 역할)
+            int checkResult = CheckGameEnd(); // 0:진행중, 1:승리, 2:패배
+
+            if (checkResult != 0) 
+            {
+                // 게임 종료!
+                SetState(TurnState.GameOver);
+                
+                bool isWin = (checkResult == 1);
+                if (UIManager.Instance != null)
+                {
+                    UIManager.Instance.ShowGameOver(isWin, currentRound);
+                }
+            }
+            else
+            {
+                // 아직 안 끝났으면 다음 턴으로
+                StartNextTurn();
+            }
+        }
 
     // =========================================================
     // 3. 턴 순환 엔진 (가장 중요!)
@@ -234,7 +278,12 @@ public class GameManager : MonoBehaviour
         turnIndex++;
         
         // 리스트 끝에 도달하면 처음(0번)으로 돌아감
-        if (turnIndex >= allUnits.Count) turnIndex = 0;
+        if (turnIndex >= allUnits.Count)
+        {
+            currentRound++;
+            turnIndex = 0;
+            Debug.Log($"=== [ Round {currentRound} 시작 ] ===");
+        }
 
         currentActor = allUnits[turnIndex];
 

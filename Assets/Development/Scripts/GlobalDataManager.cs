@@ -26,15 +26,24 @@ public class GlobalDataManager : MonoBehaviour
     public void SelectCharacter(Characters character)
     {
         userCharacter = character;
+        Debug.Log($"{character.characterName}선택");
     }
 
     public void SelectBag(BagData bag)
     {
         userBag = bag;
+        Debug.Log($"{bag.bagName}선택");
     }
 
     public void SelectStage(StageData stage)
     {
         currentStage = stage;
+        Debug.Log($"{stage.stageName}선택");
+    }
+
+    public void ClearStage()
+    {
+        currentStage = null;
+        Debug.Log("선택 해제");
     }
 }
