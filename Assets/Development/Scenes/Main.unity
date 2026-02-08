@@ -641,7 +641,7 @@ RectTransform:
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0.9}
   m_AnchorMax: {x: 1, y: 1}
-  m_AnchoredPosition: {x: 0, y: 0}
+  m_AnchoredPosition: {x: 0, y: 0.00034332275}
   m_SizeDelta: {x: 0, y: 0}
   m_Pivot: {x: 0, y: 1}
 --- !u!114 &218662095
@@ -690,7 +690,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1433732387}
         m_TargetAssemblyTypeName: GlobalDataManager, Assembly-CSharp
-        m_MethodName: SelectCharacter
+        m_MethodName: AddCharacter
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 11400000, guid: 9224b233ecd688f4b91596d500d5fb52, type: 2}
@@ -897,7 +897,7 @@ MonoBehaviour:
       m_Calls:
       - m_Target: {fileID: 1433732387}
         m_TargetAssemblyTypeName: GlobalDataManager, Assembly-CSharp
-        m_MethodName: SelectBag
+        m_MethodName: AddBag
         m_Mode: 2
         m_Arguments:
           m_ObjectArgument: {fileID: 11400000, guid: 0d3e5fa38b3c64f49947b838397be98f, type: 2}
@@ -2108,8 +2108,8 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: fa6e238b04036d24db30c80f0ac1dff9, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  userCharacter: {fileID: 0}
-  userBag: {fileID: 0}
+  characterDeck: []
+  bagDeck: []
   currentStage: {fileID: 0}
 --- !u!114 &1433732388
 MonoBehaviour:
@@ -2123,9 +2123,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 10b5099db7eb1a748973aded82baeae5, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  testCharacter: {fileID: 0}
-  testBag: {fileID: 0}
-  testStage: {fileID: 0}
+  lobbyCharacterDeck: []
+  lobbyBagDeck: []
+  currentStage: {fileID: 0}
   gameSceneName: Stage1
 --- !u!4 &1433732389
 Transform:

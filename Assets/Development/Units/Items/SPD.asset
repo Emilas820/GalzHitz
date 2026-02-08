@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: b20e5144b9cb2fc4b9cc1de460f00e5d, type: 3}
+  m_Name: SPD
+  m_EditorClassIdentifier: 
+  itemName: Healing
+  itemPrefab: {fileID: 515890245260271978, guid: 84c268ee0aeb67141bc8709c9b9bc4bd, type: 3}
+  StatusIcon: {fileID: 21300000, guid: 69bdc1f611c0f8d4dbc71613a9b04b9b, type: 3}
+  itemType: 3
+  rateValue: -3
+  rateBagData: {fileID: 0}
+  duration: 2

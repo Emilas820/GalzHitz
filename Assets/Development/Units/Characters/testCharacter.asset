@@ -14,7 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   characterName: "\uD14C\uC2A4\uD2B8"
   prefab: {fileID: 6791453501308346780, guid: d1083d0a3349b014cb4ec22c1b0710df, type: 3}
-  maxHp: 10
+  characterIcon: {fileID: 21300002, guid: 358b5d9f23bc9413e87c9948acc67ee1, type: 3}
+  maxHp: 20
   atk: 5
   def: 5
   spd: 1

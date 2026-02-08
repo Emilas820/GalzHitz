@@ -56,18 +56,21 @@ public class HeavyJoystick : MonoBehaviour, IDragHandler, IPointerDownHandler, I
     // =========================================================
     void CalculateAndSendData()
     {
-        // 원점으로부터 현재 버튼이 얼마나 이동했는지 벡터 계산
         Vector3 offset = transform.localPosition - originPos;
 
-        float normalizedPower = Mathf.Clamp(offset.x / radius, 0f, 1f);
+        // [추가] 조이스틱 X축 방향에 따른 캐릭터 반전 요청
+        if (Mathf.Abs(offset.x) > 0.1f) // 미세한 떨림 방지
+        {
+            float direction = offset.x > 0 ? 1f : -1f;
+            GameManager.Instance.UpdatePlayerDirection(direction);
+        }
+
+        float normalizedPower = Mathf.Clamp(Mathf.Abs(offset.x) / radius, 0f, 1f); // Abs 추가 (왼쪽으로 당겨도 파워는 양수)
         float normalizedAngle = Mathf.Clamp(offset.y / radius, 0f, 1f);
 
-        // 변수에 저장
-        InputPower = normalizedPower; // X축 이동량 -> 파워
-        InputAngle = normalizedAngle; // Y축 이동량 -> 각도
+        InputPower = normalizedPower;
+        InputAngle = normalizedAngle;
 
-        // 매니저에게 전달 (순서: 각도, 파워)
-        // GameManager와 Player의 함수 매개변수 순서와 일치해야 합니다.
         GameManager.Instance.UpdateInput(InputAngle, InputPower);
     }
 
@@ -92,8 +95,8 @@ public class HeavyJoystick : MonoBehaviour, IDragHandler, IPointerDownHandler, I
         Vector2 rawOffset = (localMousePos - (Vector2)originPos) - clickOriginOffset;
         
         // 1사분면(우상단) 제한 로직 (필요 시 주석 해제)
-        // rawOffset.x = Mathf.Max(0, rawOffset.x);
-        // rawOffset.y = Mathf.Max(0, rawOffset.y);
+        //rawOffset.x = Mathf.Max(0, rawOffset.x);
+        rawOffset.y = Mathf.Max(0, rawOffset.y);
 
         float rawDistance = rawOffset.magnitude;
         float resistanceFactor = 1.0f + (rawDistance * stiffness * 0.002f); 

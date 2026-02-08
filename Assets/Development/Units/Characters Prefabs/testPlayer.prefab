@@ -330,7 +330,7 @@ Rigidbody2D:
   m_Simulated: 1
   m_UseFullKinematicContacts: 0
   m_UseAutoMass: 0
-  m_Mass: 1000
+  m_Mass: 10
   m_LinearDamping: 0
   m_AngularDamping: 0.05
   m_GravityScale: 0.5
@@ -358,6 +358,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   rd: {fileID: 5562616737228619278}
+  anim: {fileID: 0}
   myBags:
   - {fileID: 11400000, guid: 0d3e5fa38b3c64f49947b838397be98f, type: 2}
   firePoint: {fileID: 9188676631423638869}
@@ -365,6 +366,10 @@ MonoBehaviour:
   maxAng: 90
   minPow: 10
   maxPow: 50
+  moveSpeed: 3
+  maxMoveFuel: 100
+  currentFuel: 0
+  fuelConsumption: 20
   trajectory: {fileID: 2586145081463426660}
 --- !u!114 &5063656543065303300
 MonoBehaviour:
@@ -395,12 +400,17 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 03c09a7c2f5f1f744b52373ede83a51d, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  baseAtk: 0
+  baseDef: 0
+  baseSpd: 0
   unitName: test
   currentHp: 10
   maxHp: 10
   atk: 5
   spd: 1
   def: 5
+  activeBuffs: []
+  sourceData: {fileID: 0}
 --- !u!1 &8986985780342676521
 GameObject:
   m_ObjectHideFlags: 0
@@ -413,7 +423,7 @@ GameObject:
   m_Layer: 0
   m_Name: firePoint
   m_TagString: Untagged
-  m_Icon: {fileID: 0}
+  m_Icon: {fileID: 7148428337604731935, guid: 0000000000000000d000000000000000, type: 0}
   m_NavMeshLayer: 0
   m_StaticEditorFlags: 0
   m_IsActive: 1
@@ -426,7 +436,7 @@ Transform:
   m_GameObject: {fileID: 8986985780342676521}
   serializedVersion: 2
   m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 1.2, y: 0.65, z: 0}
+  m_LocalPosition: {x: 1.2, y: 0, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children:

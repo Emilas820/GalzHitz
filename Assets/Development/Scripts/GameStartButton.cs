@@ -15,11 +15,12 @@ public class GameStartButton : MonoBehaviour
             return;
         }
 
-        // 안전장치: 필수 데이터가 다 선택되었는지 확인
-        if (GlobalDataManager.Instance.userCharacter == null || 
-            GlobalDataManager.Instance.userBag == null || GlobalDataManager.Instance.currentStage == null)
+        // 2. ★ [수정] 데이터 유효성 검사 (리스트 기반)
+        // 캐릭터 덱이 비어있거나, 스테이지가 선택되지 않았으면 시작 불가
+        if (GlobalDataManager.Instance.characterDeck.Count == 0 || 
+            GlobalDataManager.Instance.currentStage == null)
         {
-            Debug.LogError("캐릭터나 스테이지가 선택되지 않았습니다!");
+            Debug.LogError("캐릭터 덱이 비어있거나, 스테이지가 선택되지 않았습니다!");
             return;
         }
 

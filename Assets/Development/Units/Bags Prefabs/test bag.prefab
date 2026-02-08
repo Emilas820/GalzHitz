@@ -176,3 +176,7 @@ MonoBehaviour:
   m_Name: 
   m_EditorClassIdentifier: 
   damageEffect: {fileID: 8176850701479282271, guid: b219c04f384e7f345bb8ae1fef443965, type: 3}
+  targetLayer:
+    serializedVersion: 2
+    m_Bits: 640
+  detectionSize: {x: 1.05, y: 0.7}

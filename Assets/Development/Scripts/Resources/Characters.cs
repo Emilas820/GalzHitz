@@ -6,6 +6,7 @@ public class Characters : ScriptableObject
     [Header("기본 정보")]
     public string characterName;  // 캐릭터 이름
     public GameObject prefab;     // 캐릭터 프리팹 (외형)
+    public Sprite characterIcon;    // 캐릭터 이미지
 
     [Header("스탯")]
     public int maxHp;      // 최대 체력

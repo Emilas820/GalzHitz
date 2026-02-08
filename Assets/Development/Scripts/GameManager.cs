@@ -9,6 +9,7 @@ public enum TurnState
     Init,           // 1. 게임 초기화 (데이터 로드)
     TurnStart,      // 2. 턴 시작 연출 (카메라 이동, 바람 적용)
     PlayerAiming,   // 3. 플레이어 조준 (입력 대기)
+    PlayerMoving,   // 3. 플레이어 이동
     EnemyAiming,    // 3. 적 AI 생각 중
     Firing,         // 4. 발사 및 궤적 확인 (조작 불가)
     Resolution,     // 5. 결과 판정 (데미지, 승패 체크)
@@ -27,6 +28,12 @@ public class GameManager : MonoBehaviour
     public TurnState currentState; // 스테이트 머신
     public List<BattleUnit> allUnits = new List<BattleUnit>(); // 전체 참가자 명단
     public int turnIndex = -1; // 현재 순번 (-1로 시작)
+
+    public bool hasMovedThisTurn = false;       // 실제로 이동했는가?
+
+    [Header("스킬 시스템")]
+    public float slowMotionFactor = 0.2f; // 슬로우 모션 배율 (0.2 = 5배 느려짐)
+    public float slowMotionDuration = 0.0f; // 현재 슬로우 모션 중인지 체크용
 
     // 싱글톤 준비운동
     void Awake()
@@ -87,19 +94,30 @@ public class GameManager : MonoBehaviour
                 StartCoroutine(TurnStartProcess());
                 break;
             case TurnState.PlayerAiming:
-                // UI 켜기 등의 로직이 필요하다면 여기에 작성
-                Debug.Log(">> 플레이어 조준 시작 (조이스틱 활성화)");
+                // 플레이어 조준 턴 -> 조준 조이스틱 & 버튼 켜기
+                Debug.Log(">> 플레이어 조준 시작");
+                if (UIManager.Instance != null) UIManager.Instance.SetJoystickMode(true);
+                break;
+            case TurnState.PlayerMoving:
+                // 플레이어 이동 턴 -> 이동 조이스틱 & 버튼 켜기
+                if (UIManager.Instance != null) UIManager.Instance.SetJoystickMode(false);
                 break;
             case TurnState.EnemyAiming:
+                // 적 턴 -> UI 끄기
+                if (UIManager.Instance != null) UIManager.Instance.DisablePlayerControls();
                 break;
             case TurnState.Firing:
-                // 발사 및 궤적 확인 (조작 불가)
+                // 발사 중: 스킬 UI만 남기고 나머지는 숨김
+                if (UIManager.Instance != null) UIManager.Instance.SetFiringMode();
                 break;
             case TurnState.Resolution:
+                // 결과 판정 중 -> UI 끄기
+                if (UIManager.Instance != null) UIManager.Instance.DisablePlayerControls();
                 StartCoroutine(ResolutionProcess());
                 break;
             case TurnState.GameOver:
-                // 게임 종료
+                // 게임 종료 -> UI 끄기
+                if (UIManager.Instance != null) UIManager.Instance.DisablePlayerControls();
                 Debug.Log("게임 종료!");
                 break;
         }
@@ -118,23 +136,40 @@ public class GameManager : MonoBehaviour
         GlobalDataManager globalData = GlobalDataManager.Instance;
         StageSetup mapInfo = StageSetup.Instance;
 
-        // 예외 처리: 데이터가 없으면 테스트 모드로 간주하거나 중단
-        if (globalData == null || mapInfo == null)
+        // ★ [수정] 데이터가 없거나(OR) 덱이 비어있을 때 예외 처리
+        if (globalData == null || globalData.characterDeck.Count == 0)
         {
-            Debug.LogError("글로벌 데이터나 스테이지 셋업이 없습니다! (테스트 씬인가요?)");
-            // 테스트를 위해 기존 Find 로직을 남겨두거나 yield break;
+            Debug.LogError("글로벌 데이터나 캐릭터 덱이 없습니다!");
+            
+            // 테스트용 임시 데이터를 여기서 생성하거나, 그냥 종료
             yield break; 
         }
 
         // 2. 플레이어 생성 (아군)
-        if (globalData.userCharacter != null)
+        if (globalData != null && globalData.characterDeck.Count > 0)
         {
-            SpawnUnit(globalData.userCharacter, mapInfo.playerSpawnPoint, Team.Player);
-            BattleUnit playerUnit = allUnits[allUnits.Count - 1];   // 가방을 쥐어줌
-        }
-        else
-        {
-            Debug.LogError("선택된 플레이어 캐릭터가 없습니다!");
+            // 리스트에 있는 만큼 반복 (최대 스폰 포인트 개수만큼)
+            int count = Mathf.Min(globalData.characterDeck.Count, 1); 
+            // ※ 일단 1명만 소환한다면 1, 여러명이면 spawnPoints 리스트 필요
+
+            for (int i = 0; i < count; i++)
+            {
+                // A. 캐릭터 소환
+                Characters charData = globalData.characterDeck[i];
+                SpawnUnit(charData, mapInfo.playerSpawnPoint, Team.Player);
+                
+                // B. 방금 소환된 유닛 가져오기
+                BattleUnit newUnit = allUnits[allUnits.Count - 1];
+
+                // C. 짝이 되는 가방 찾아서 쥐어주기
+                if (i < globalData.bagDeck.Count && globalData.bagDeck[i] != null)
+                {
+                    BagData bagToEquip = globalData.bagDeck[i];
+                    
+                    newUnit.playerScript.myBags.Clear(); // 기본 가방 비우고
+                    newUnit.playerScript.myBags.Add(bagToEquip); // 선택한 가방 장착
+                }
+            }
         }
 
         // 3. 적군 생성 (수정됨: enemies -> enemySpawns)
@@ -174,21 +209,38 @@ public class GameManager : MonoBehaviour
 
         yield return null; // 1프레임 대기
 
-        // 4. 턴 순서 정렬 (기존 로직)
-        allUnits.Sort((a, b) => {
-            if (a.stats == null || b.stats == null) return 0;
-            if (a.stats.spd > b.stats.spd) return -1;
-            else if (a.stats.spd < b.stats.spd) return 1;
-            return 0;
-        });
+        // 턴 순서 정렬
+        SortUnitsBySpeed();
 
         // 정렬 로그
         string log = "턴 순서: ";
         foreach (var unit in allUnits) log += $"{unit.name}(SPD:{unit.stats.spd}) -> ";
         Debug.Log(log);
 
+        // 유닛 배치가 끝났으니 UI 생성 요청
+        if (UIManager.Instance != null)
+        {
+            UIManager.Instance.GenerateUnitStatusUI();
+        }
+
         yield return new WaitForSeconds(1f);
         StartNextTurn(); 
+    }
+
+    // 정렬 함수 분리
+    void SortUnitsBySpeed()
+    {
+        allUnits.Sort((a, b) => {
+            if (a.stats == null || b.stats == null) return 0;
+            // 내림차순 (SPD 높은 사람이 먼저)
+            if (a.stats.spd > b.stats.spd) return -1;
+            else if (a.stats.spd < b.stats.spd) return 1;
+            return 0;
+        });
+        
+        string log = $"[Round {currentRound} 순서] ";
+        foreach (var unit in allUnits) log += $"{unit.name}({unit.stats.spd}) -> ";
+        Debug.Log(log);
     }
 
     
@@ -260,6 +312,7 @@ public class GameManager : MonoBehaviour
                 bool isWin = (checkResult == 1);
                 if (UIManager.Instance != null)
                 {
+                    Debug.Log("결과 보냅니당");
                     UIManager.Instance.ShowGameOver(isWin, currentRound);
                 }
             }
@@ -283,9 +336,18 @@ public class GameManager : MonoBehaviour
             currentRound++;
             turnIndex = 0;
             Debug.Log($"=== [ Round {currentRound} 시작 ] ===");
+
+            SortUnitsBySpeed();
         }
 
         currentActor = allUnits[turnIndex];
+
+        hasMovedThisTurn = false;
+        // 플레이어라면 연료 리필 (Player.cs에 함수 추가 예정)
+        if (currentActor.playerScript != null)
+        {
+            currentActor.playerScript.ResetTurnData(); 
+        }
 
         // 만약 죽은 유닛이면 건너뛰기 (재귀 호출)
         if (currentActor.isDead)
@@ -294,8 +356,50 @@ public class GameManager : MonoBehaviour
             return;
         }
 
+        // ★ [추가] 턴 시작 시 버프 시간 감소
+        // UnitStats에 OnTurnStart() 함수를 만들었으므로 호출
+        if (currentActor.stats != null)
+        {
+            currentActor.stats.OnTurnStart();
+        }
+
         // 상태를 'TurnStart'로 바꾸면 위의 TurnStartProcess가 실행됨
         SetState(TurnState.TurnStart);
+    }
+
+    // =========================================================
+    // 턴 종료 (조건 3, 4)
+    // =========================================================
+    // "턴 종료" 버튼을 누르거나, 연료가 다 떨어졌을 때 호출
+    public void EndTurnManual()
+    {
+        // 이동/조준 중일 때만 가능
+        if (currentState == TurnState.PlayerMoving || currentState == TurnState.PlayerAiming)
+        {
+            Debug.Log("턴 종료 요청됨 (이동 종료)");
+
+            // ★ [추가] 현재 조종 중인 캐릭터를 즉시 멈춰세움!
+            if (currentActor != null && currentActor.playerScript != null)
+            {
+                currentActor.playerScript.StopMove();
+            }
+
+            // UI 비활성화
+            if (UIManager.Instance != null) UIManager.Instance.DisablePlayerControls();
+
+            // 바로 결과 페이즈 -> 다음 턴
+            SetState(TurnState.Resolution);
+        }
+    }
+
+    // 플레이어가 "나 움직였어!"라고 보고하는 함수
+    public void ReportPlayerMovement()
+    {
+        if (!hasMovedThisTurn)
+        {
+            hasMovedThisTurn = true;
+            Debug.Log("이동 시작! 이제 투척 모드로 못 돌아감.");
+        }
     }
 
 
@@ -324,6 +428,19 @@ public class GameManager : MonoBehaviour
         }
     }
 
+    // 좌우반전
+    public void UpdatePlayerDirection(float direction)
+    {
+        // 1. 현재 턴이 플레이어 조준 상태인지 확인
+        if (currentState != TurnState.PlayerAiming) return;
+
+        // 2. 현재 행동 중인 유닛(currentActor)에게 방향 전달
+        if (currentActor != null && currentActor.playerScript != null)
+        {
+            currentActor.playerScript.SetDirection(direction);
+        }
+    }
+
     public void RequestThrow()
     {
         if (currentState != TurnState.PlayerAiming) return;
@@ -331,5 +448,79 @@ public class GameManager : MonoBehaviour
 
         SetState(TurnState.Firing); 
         currentActor.playerScript.Throw();
+    }
+
+    // 이동 - 투척 모드 전환 함수 (버튼 클릭 시 호출)
+    public void ToggleMoveMode()
+    {
+        // 내 턴이 아니면 무시
+        if (currentState != TurnState.PlayerAiming && currentState != TurnState.PlayerMoving) return;
+
+        // ★ [조건 3] 이미 움직이기 시작했다면, 투척 모드(Aiming)로 돌아갈 수 없음!
+        if (hasMovedThisTurn && currentState == TurnState.PlayerMoving)
+        {
+            Debug.Log("이미 움직여서 투척 모드로 돌아갈 수 없습니다!");
+            return;
+        }
+
+        // 조준 <-> 이동 상태 토글
+        if (currentState == TurnState.PlayerAiming)
+        {
+            SetState(TurnState.PlayerMoving);
+        }
+        else
+        {
+            SetState(TurnState.PlayerAiming);
+        }
+    }
+
+    // 이동 조이스틱에서 오는 신호 처리
+    public void UpdateMoveInput(float xInput)
+    {
+        // 이동 모드일 때만 작동
+        if (currentState != TurnState.PlayerMoving) return;
+
+        if (currentActor != null && currentActor.playerScript != null)
+        {
+            currentActor.playerScript.Move(xInput);
+        }
+    }
+
+    // =========================================================
+    // ★ [추가] 시간 조절 (슬로우 모션)
+    // =========================================================
+    public void SetTimeScale(float scale)
+    {
+        Time.timeScale = scale;
+        Time.fixedDeltaTime = 0.02f * Time.timeScale; // 물리 연산도 비율에 맞춰 조정
+    }
+
+    // =========================================================
+    // ★ [추가] 스킬 조이스틱 입력 처리
+    // =========================================================
+    
+    // 스킬 조이스틱이 "나 지금 켜져도 돼?" 라고 물어볼 때 사용
+    public bool CanUseSkillJoystick()
+    {
+        // 발사 중(Firing)이고, 아직 터지지 않았을 때만 가능
+        return currentState == TurnState.Firing;
+    }
+
+    // 스킬 발동 명령 (Joystick -> GameManager -> Bag)
+    public void ActivateCurrentProjectileSkill()
+    {
+        // 현재 날아가고 있는 가방(Bag)을 찾아서 스킬 실행
+        // 카메라가 보고 있는 대상을 가져오거나, 태그로 찾습니다.
+        if (CameraManager.Instance != null && CameraManager.Instance.virtualCamera.Follow != null)
+        {
+            Transform target = CameraManager.Instance.virtualCamera.Follow;
+            Bag activeBag = target.GetComponent<Bag>();
+            
+            if (activeBag != null)
+            {
+                activeBag.ActivateSkill(); // 가방의 스킬 발동!
+                Debug.Log("GameManager: 스킬 발동 명령 전달!");
+            }
+        }
     }
 }

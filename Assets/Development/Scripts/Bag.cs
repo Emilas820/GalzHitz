@@ -3,66 +3,125 @@ using UnityEngine;
 public class Bag : MonoBehaviour
 {
     private float finalDamage;
-    private Team shooterTeam; // ★ 발사한 사람의 팀 정보
+    private BattleUnit shooter; // 던진 사람
+    private Team shooterTeam;   // 던진 팀
+    
     public GameObject damageEffect;
 
-    void Start()
-    {
-        Invoke("ForceDestroy", 7.0f);
-    }
+    [Header("설정")]
+    public LayerMask targetLayer; // 인스펙터에서 'Unit'만 체크!
+    public Vector2 detectionSize = new Vector2(0.8f, 0.6f); // 인지 범위
 
-    // Setup 함수에 team 정보 추가
-    public void Setup(float damageAmount, Team team) 
+    public void Setup(float damageAmount, BattleUnit owner) 
     {
         this.finalDamage = damageAmount;
-        this.shooterTeam = team; // 팀 정보 저장
+        this.shooter = owner;           
+        this.shooterTeam = owner.myTeam; 
+        
+        Invoke("ExplodeAndDestroy", 7f);
     }
 
+    // =========================================================
+    // 1. 물리 충돌 (바닥) - Matrix 켜진 놈들
+    // =========================================================
     void OnCollisionEnter2D(Collision2D collision)
     {
-        if(collision.gameObject.tag == "Ground")
-        return;
-
-        else
-        {
-            // 1. 부딪힌 대상의 BattleUnit(명찰)을 확인
-        BattleUnit targetUnit = collision.gameObject.GetComponent<BattleUnit>();
-
-        // 대상이 전투 유닛(캐릭터)이라면?
-        if (targetUnit != null)
-        {
-            // 만약 발사한 팀과 피격자의 팀이 같다면? (아군 오폭)
-            if (targetUnit.myTeam == this.shooterTeam)
-            {
-                Debug.Log("아군입니다! 데미지 무효.");
-                // 여기서 return 하면 데미지 안 주고 끝냄 (폭발 이펙트는 나올 수 있음)
-                GameManager.Instance.OnActionComplete();
-                return;
-            }
-        }
-
-        // 2. 적군이라면 데미지 처리
-        UnitStats targetStats = collision.gameObject.GetComponent<UnitStats>();
-        if (targetStats != null)
-        {
-            targetStats.TakeDamage((int)finalDamage);
-        }
-
-        GameObject ef = Instantiate(damageEffect, transform.position, Quaternion.identity);
-        GameManager.Instance.OnActionComplete();
-        Destroy(ef, 1f);
-        Destroy(gameObject);
-        }        
+        // [조건 3] 바닥에 닿음 -> 충돌 발생(튕김), 폭발 안 함.
+        // 여기에 "통~" 하는 효과음 넣으면 좋습니다.
     }
 
-    void ForceDestroy()
+    // =========================================================
+    // 2. 센서 감지 (유닛) - Matrix 꺼진 놈들
+    // =========================================================
+    void FixedUpdate()
     {
-        if (gameObject != null) // 이미 터졌으면 무시
+        // 내 위치에 'Unit'이 겹쳐있는지 검사
+        Collider2D hit = Physics2D.OverlapBox(transform.position, detectionSize, transform.eulerAngles.z, targetLayer);
+
+        if (hit != null)
         {
-            if (GameManager.Instance != null) 
-                GameManager.Instance.OnActionComplete();
-            
-            Destroy(gameObject);
+            BattleUnit targetUnit = hit.GetComponent<BattleUnit>();
+            if (targetUnit != null)
+            {
+                // [조건 1] 나 자신이거나 같은 팀(아군)이면?
+                if (targetUnit == shooter || targetUnit.myTeam == shooterTeam)
+                {
+                    // 아무것도 안 함 -> 자연스럽게 통과됨 (return)
+                    return;
+                }
+
+                // [조건 2] 적군이면?
+                // 통과하면서 데미지 주고 터짐
+                UnitStats targetStats = hit.GetComponent<UnitStats>();
+                if (targetStats != null)
+                {
+                    targetStats.TakeDamage((int)finalDamage);
+                }
+
+                // 폭발 이펙트 + 삭제
+                ExplodeAndDestroy();
+            }
+
+            // 2. ★ [추가] 구조물인지 확인
+            Structure targetStructure = hit.GetComponent<Structure>();
+            if (targetStructure != null)
+            {
+                // 구조물은 팀 구분 없이 무조건 데미지
+                targetStructure.TakeDamage(finalDamage);
+
+                // 폭발하고 가방 삭제
+                ExplodeAndDestroy();
+            }
         }
+    }
+
+    void OnDrawGizmos()
+    {
+        // 1. 색상 지정 (빨간색)
+        Gizmos.color = new Color(1, 0, 0, 0.5f); // 반투명 빨강
+
+        // 2. 가방의 회전 각도와 위치를 기즈모에도 적용 (핵심!)
+        // 이 코드가 없으면 가방은 도는데 박스는 가만히 서 있게 됨
+        Matrix4x4 rotationMatrix = Matrix4x4.TRS(transform.position, transform.rotation, transform.lossyScale);
+        Gizmos.matrix = rotationMatrix; 
+
+        // 3. 박스 그리기
+        // (이미 위치/회전은 matrix로 맞췄으니 중심점은 0,0,0으로 잡음)
+        if (detectionSize != Vector2.zero)
+        {
+            Gizmos.DrawWireCube(Vector3.zero, detectionSize); // 테두리만
+            Gizmos.DrawCube(Vector3.zero, detectionSize);     // 내부 채우기 (선택)
+        }
+    }
+
+    void ExplodeAndDestroy()
+    {
+        // 폭발 이펙트 생성
+        if (damageEffect != null)
+        {
+            GameObject ef = Instantiate(damageEffect, transform.position, Quaternion.identity);
+            Destroy(ef, 2f);
+        }
+
+        // 턴 종료 보고
+        if (GameManager.Instance != null) 
+            GameManager.Instance.OnActionComplete();
+
+        // 가방 삭제
+        Destroy(gameObject);
+        
+    }
+
+    private bool isSkillUsed = false;
+
+    public void ActivateSkill()
+    {
+        if (isSkillUsed) return; // 이미 썼으면 무시
+
+        isSkillUsed = true;
+        Debug.Log($"[{gameObject.name}] 특수 스킬 발동!");
+        
+        // 여기에 실제 스킬 로직 구현 (예: 분열, 가속, 방향 전환 등)
+        // 지금은 이펙트만 살짝 보여주거나 로그만 띄움
     }
 }
