@@ -1,0 +1,23 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: a77b237fa26ab85409ed6722d9e23f83, type: 3}
+  m_Name: testCharacter2
+  m_EditorClassIdentifier: 
+  characterName: TEST 2
+  prefab: {fileID: 6791453501308346780, guid: d1083d0a3349b014cb4ec22c1b0710df, type: 3}
+  characterImage: {fileID: -2629926704377742645, guid: 75d9d21740f037c4d9bc83556cd0f28c, type: 3}
+  character: {fileID: 21300000, guid: 94ea43556dfb347439e67a9da6005b9a, type: 3}
+  maxHp: 20
+  atk: 5
+  def: 5
+  spd: 1
+  defaultBag: {fileID: 11400000, guid: 0d3e5fa38b3c64f49947b838397be98f, type: 2}

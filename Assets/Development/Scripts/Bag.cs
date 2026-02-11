@@ -54,11 +54,12 @@ public class Bag : MonoBehaviour
                 // 통과하면서 데미지 주고 터짐
                 UnitStats targetStats = hit.GetComponent<UnitStats>();
                 if (targetStats != null)
-                {
+                {                    
                     targetStats.TakeDamage((int)finalDamage);
                 }
 
                 // 폭발 이펙트 + 삭제
+                SoundManager.Instance.PlaySFX(SoundManager.Instance.hit);
                 ExplodeAndDestroy();
             }
 

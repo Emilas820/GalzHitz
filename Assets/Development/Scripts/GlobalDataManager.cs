@@ -24,7 +24,6 @@ public class GlobalDataManager : MonoBehaviour
         }
     }
 
-
     public void SelectStage(StageData stage)
     {
         currentStage = stage;

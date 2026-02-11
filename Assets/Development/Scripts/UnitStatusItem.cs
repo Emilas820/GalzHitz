@@ -23,7 +23,7 @@ public class UnitStatusItem : MonoBehaviour
         
         // 2. 얼굴 이미지 설정
         if (targetStats.sourceData != null && faceIcon != null)
-            faceIcon.sprite = targetStats.sourceData.characterIcon;
+            faceIcon.sprite = targetStats.sourceData.characterImage;
 
         // 3. 무기 이미지 설정
         if (weaponIcon != null && unit.playerScript != null && unit.playerScript.myBags.Count > 0)

@@ -46,6 +46,7 @@ public class GameManager : MonoBehaviour
     // 스테이트 머신 시작
     void Start()
     {
+        SoundManager.Instance.PlayBGM(SoundManager.Instance.ingame_Background);
         SetState(TurnState.Init);
     }
 
@@ -251,6 +252,20 @@ public class GameManager : MonoBehaviour
     IEnumerator TurnStartProcess()
     {
         Debug.Log($"====== [ 턴 시작: {currentActor.name} ] ======");
+
+        if (UIManager.Instance != null)
+        {
+            // 유닛 이름(GameObjectName) 또는 스탯상의 이름(characterName)을 전달
+            string displayName = currentActor.name;
+            
+            // 만약 UnitStats에 설정된 예쁜 한글 이름이 있다면 그걸 우선 사용
+            if (currentActor.stats != null && !string.IsNullOrEmpty(currentActor.stats.unitName))
+            {
+                displayName = currentActor.stats.unitName;
+            }
+
+            UIManager.Instance.UpdateTurnText(displayName, currentActor.myTeam);
+        }
 
         if (CameraManager.Instance != null)
             CameraManager.Instance.SetTarget(currentActor.transform);

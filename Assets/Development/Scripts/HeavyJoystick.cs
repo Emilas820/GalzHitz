@@ -109,6 +109,7 @@ public class HeavyJoystick : MonoBehaviour, IDragHandler, IPointerDownHandler, I
 
     public void OnPointerUp(PointerEventData eventData)
     {
+        SoundManager.Instance.PlaySFX(SoundManager.Instance.throwBag);
         isPressed = false; // 누름 상태 OFF
 
         targetPos = originPos; 

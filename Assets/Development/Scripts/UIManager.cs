@@ -157,15 +157,27 @@ public class UIManager : MonoBehaviour
     }
 
     // 1. 턴이 바뀔 때 호출 (GameManager가 부름)
-    public void UpdateTurnText(string name)
+    public void UpdateTurnText(string name, Team team)
     {
         if (turnText != null)
         {
             turnPanel.SetActive(true);
-            turnText.text = $"[ {name}의 차례 ]";
-            Invoke("OffturnPanel", 3f);
-            
-            // (선택) 텍스트 애니메이션 등을 넣을 수 있음
+
+            // ★ 팀에 따라 텍스트와 색상 분기
+            if (team == Team.Player)
+            {
+                turnText.text = $"[ 아군 <color=yellow>{name}</color>의 차례 ]";
+                turnText.color = new Color(0.3f, 0.7f, 1f); // 시원한 파란색
+            }
+            else
+            {
+                turnText.text = $"[ 적군 <color=yellow>{name}</color>의 차례 ]";
+                turnText.color = new Color(1f, 0.4f, 0.4f); // 위협적인 빨간색
+            }
+
+            // 기존 3초는 좀 길어서 2초로 줄임 (원하는 대로 조절 가능)
+            CancelInvoke("OffturnPanel"); // 혹시 기존 타이머가 돌고 있으면 취소
+            Invoke("OffturnPanel", 2.0f);
         }
     }
 
@@ -180,7 +192,7 @@ public class UIManager : MonoBehaviour
             
             // (선택) 연료가 거의 없으면 빨간색으로 깜빡이게 하거나 색 변경 가능
             if (ratio < 0.3f) fuelGaugeImage.color = Color.red;
-            else fuelGaugeImage.color = Color.green; // 혹은 원래 색
+            else fuelGaugeImage.color = Color.cyan; // 혹은 원래 색
         }
     }
 

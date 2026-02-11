@@ -1,0 +1,21 @@
+%YAML 1.1
+%TAG !u! tag:unity3d.com,2011:
+--- !u!114 &11400000
+MonoBehaviour:
+  m_ObjectHideFlags: 0
+  m_CorrespondingSourceObject: {fileID: 0}
+  m_PrefabInstance: {fileID: 0}
+  m_PrefabAsset: {fileID: 0}
+  m_GameObject: {fileID: 0}
+  m_Enabled: 1
+  m_EditorHideFlags: 0
+  m_Script: {fileID: 11500000, guid: 0498ab478712f124786839975440e984, type: 3}
+  m_Name: TestBag2
+  m_EditorClassIdentifier: 
+  bagName: Test Bag2
+  bagPrefab: {fileID: 7395751756218625456, guid: 982743f89029b0445ba5b131593fc34f, type: 3}
+  bagImage: {fileID: -6009198046271197863, guid: 730adc3daebcdaf43b7a590af36e1ce4, type: 3}
+  skillImage: {fileID: 21300000, guid: 99b70ef2b0acc4c44a556d238188bef2, type: 3}
+  damage: 5
+  type: 0
+  bagIcon: {fileID: 21300006, guid: 358b5d9f23bc9413e87c9948acc67ee1, type: 3}

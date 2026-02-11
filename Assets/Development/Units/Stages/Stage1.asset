@@ -15,7 +15,7 @@ MonoBehaviour:
   stageName: Stage1
   sceneName: Stage1
   enemySpawns:
-  - character: {fileID: 11400000, guid: 9224b233ecd688f4b91596d500d5fb52, type: 2}
-    customBag: {fileID: 11400000, guid: 0d3e5fa38b3c64f49947b838397be98f, type: 2}
-  - character: {fileID: 11400000, guid: 9224b233ecd688f4b91596d500d5fb52, type: 2}
-    customBag: {fileID: 11400000, guid: 0d3e5fa38b3c64f49947b838397be98f, type: 2}
+  - character: {fileID: 11400000, guid: 189f664346ded2c41a8cdc24345f2898, type: 2}
+    customBag: {fileID: 11400000, guid: 83136dcbcb27e8048b46f9fe2ba6cc8b, type: 2}
+  - character: {fileID: 11400000, guid: 189f664346ded2c41a8cdc24345f2898, type: 2}
+    customBag: {fileID: 11400000, guid: 83136dcbcb27e8048b46f9fe2ba6cc8b, type: 2}
