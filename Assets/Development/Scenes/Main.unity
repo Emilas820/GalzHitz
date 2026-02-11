@@ -2090,7 +2090,7 @@ GameObject:
   - component: {fileID: 1433732388}
   - component: {fileID: 1433732387}
   m_Layer: 0
-  m_Name: GlobalGameManager
+  m_Name: = GlobalGameManager
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2229,7 +2229,7 @@ GameObject:
   - component: {fileID: 1491522092}
   - component: {fileID: 1491522091}
   m_Layer: 0
-  m_Name: Main Camera
+  m_Name: = Main Camera
   m_TagString: MainCamera
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2614,7 +2614,7 @@ GameObject:
   - component: {fileID: 1757469385}
   - component: {fileID: 1757469384}
   m_Layer: 5
-  m_Name: UI
+  m_Name: = UI
   m_TagString: Untagged
   m_Icon: {fileID: 0}
   m_NavMeshLayer: 0
@@ -2699,6 +2699,7 @@ RectTransform:
   - {fileID: 1544192540}
   - {fileID: 926305399}
   - {fileID: 989567634}
+  - {fileID: 2028930550}
   m_Father: {fileID: 0}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
   m_AnchorMin: {x: 0, y: 0}
@@ -3059,12 +3060,12 @@ Transform:
   m_PrefabAsset: {fileID: 0}
   m_GameObject: {fileID: 2028930547}
   serializedVersion: 2
-  m_LocalRotation: {x: 0, y: 0, z: 0, w: 1}
-  m_LocalPosition: {x: 0, y: 0, z: 0}
+  m_LocalRotation: {x: -0, y: -0, z: -0, w: 1}
+  m_LocalPosition: {x: -960, y: -540, z: 0}
   m_LocalScale: {x: 1, y: 1, z: 1}
   m_ConstrainProportionsScale: 0
   m_Children: []
-  m_Father: {fileID: 0}
+  m_Father: {fileID: 1757469387}
   m_LocalEulerAnglesHint: {x: 0, y: 0, z: 0}
 --- !u!1660057539 &9223372036854775807
 SceneRoots:
@@ -3073,4 +3074,3 @@ SceneRoots:
   - {fileID: 1491522093}
   - {fileID: 1433732389}
   - {fileID: 1757469387}
-  - {fileID: 2028930550}

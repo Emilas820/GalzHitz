@@ -12,7 +12,7 @@ public class Characters : ScriptableObject
     public int maxHp;      // 최대 체력
     public float atk;      // 공격력 보정치
     public float def;      // 방어력
-    public float spd;      // 이동 속도 (필요 시)
+    public float spd;      // 이동 속도
 
     [Header("전용 장비")]
     public BagData defaultBag; // 캐릭터와 매칭되는 가방 (전무)

@@ -6,10 +6,10 @@ public class TrajectoryLine : MonoBehaviour
     [Header("설정")]
     public GameObject dotPrefab;   // ★ 점으로 쓸 프리팹 (Sprite)
     public int maxSteps = 30;      // 최대 점 개수
-    public float timeStep = 0.05f; // 점 간격 (시간 단위)
+    public float timeStep = 0.1f; // 점 간격 (시간 단위)
 
     [Header("페이드 아웃")]
-    public float fadeHeight = -2.0f; // 이 높이에서 끊기
+    public float fadeHeight = -7.5f; // 이 높이에서 끊기
 
     // 점들을 재사용하기 위해 모아두는 리스트 (메모리 절약)
     private List<GameObject> dotPool = new List<GameObject>();
@@ -27,7 +27,6 @@ public class TrajectoryLine : MonoBehaviour
         Vector2 currentPos = startPos;
         Vector2 currentVel = startVelocity;
         Vector2 gravity = Physics2D.gravity * gravityScale;
-
         // 시뮬레이션 돌리기
         for (int i = 0; i < maxSteps; i++)
         {

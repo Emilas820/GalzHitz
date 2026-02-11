@@ -155,7 +155,7 @@ MonoBehaviour:
   dotPrefab: {fileID: 2724985481127998151, guid: 7585e468b80ecc047ba12658ba0e50f9, type: 3}
   maxSteps: 30
   timeStep: 0.1
-  fadeHeight: -3
+  fadeHeight: -7.5
 --- !u!1 &6791453501308346780
 GameObject:
   m_ObjectHideFlags: 0

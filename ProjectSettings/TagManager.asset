@@ -19,7 +19,7 @@ TagManager:
   - Bag
   - Structure
   - Item
-  - 
+  - SkyObject
   - 
   - 
   - 
@@ -53,8 +53,20 @@ TagManager:
   - name: Player
     uniqueID: 3972195191
     locked: 0
+  - name: Bag
+    uniqueID: 3954838755
+    locked: 0
+  - name: Item
+    uniqueID: 1075641345
+    locked: 0
+  - name: Effect
+    uniqueID: 1490661161
+    locked: 0
   - name: UI
     uniqueID: 1021483117
+    locked: 0
+  - name: Structure
+    uniqueID: 4230167197
     locked: 0
   m_RenderingLayers:
   - Default

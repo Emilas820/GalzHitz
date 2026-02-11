@@ -12,6 +12,20 @@ public class ItemObject : MonoBehaviour
         this.data = targetData;
     }
 
+    // ★ [수정] Trigger -> Collision으로 변경
+    // Is Trigger를 껐으므로, 이제 "충돌(Collision)" 이벤트를 받아야 합니다.
+    private void OnCollisionEnter2D(Collision2D collision)
+    {
+        // Collision2D에서는 .gameObject를 통해 접근해야 합니다.
+        BattleUnit unit = collision.gameObject.GetComponent<BattleUnit>();
+
+        // 유닛이 맞고 + 살아있고 + 플레이어 팀일 때만 획득
+        if (unit != null && !unit.isDead && unit.myTeam == Team.Player)
+        {
+            Collect(unit);
+        }
+    }
+
     // 플레이어가(Player.cs) 호출할 함수
     public void Collect(BattleUnit unit)
     {
