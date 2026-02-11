@@ -14,6 +14,8 @@ MonoBehaviour:
   m_EditorClassIdentifier: 
   bagName: Test Bag
   bagPrefab: {fileID: 7395751756218625456, guid: 982743f89029b0445ba5b131593fc34f, type: 3}
+  bagImage: {fileID: -6009198046271197863, guid: 730adc3daebcdaf43b7a590af36e1ce4, type: 3}
+  skillImage: {fileID: 21300000, guid: 99b70ef2b0acc4c44a556d238188bef2, type: 3}
   damage: 5
   type: 0
   bagIcon: {fileID: 21300012, guid: 358b5d9f23bc9413e87c9948acc67ee1, type: 3}

@@ -14,6 +14,8 @@ public class BagData : ScriptableObject
 {
     public string bagName;          // 가방 이름
     public GameObject bagPrefab;    // 실제 가방 프리팹
+    public Sprite bagImage;         // 가방 이미지
+    public Sprite skillImage;        // 스킬 이미지
     public float damage;            // 공격력
     public BagType type;            // 투사체 속성
     public Sprite bagIcon;          // 가방 이미지

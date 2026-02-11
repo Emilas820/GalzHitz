@@ -6,7 +6,7 @@ public class SkillJoystick : MonoBehaviour, IDragHandler, IPointerDownHandler, I
     [Header("이동 설정")]
     public float radius = 200f;     // 왼쪽보다 조금 작게 설정 추천
 
-    [Header("묵직함 설정")]
+    [Header("감도 설정")]
     public float stiffness = 2.0f; 
     public float smoothSpeed = 15f; 
 

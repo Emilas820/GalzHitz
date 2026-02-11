@@ -1,6 +1,8 @@
-using System.Collections;
 using System.Collections.Generic;
+using System.Collections;
+using UnityEngine.UI;
 using UnityEngine;
+
 
 // 스테이트 머신 - 턴 관리
 public enum TurnState
@@ -341,6 +343,17 @@ public class GameManager : MonoBehaviour
         }
 
         currentActor = allUnits[turnIndex];
+
+        if (currentActor.myTeam == Team.Player && currentActor.playerScript != null)
+        {
+            if (currentActor.playerScript.myBags.Count > 0)
+            {
+                // 첫 번째 가방의 이미지를 UI에 전달
+                Sprite bagSprite = currentActor.playerScript.myBags[0].bagImage;
+                Sprite skillSprite = currentActor.playerScript.myBags[0].skillImage;
+                UIManager.Instance.UpdateHandleImage(bagSprite, skillSprite);
+            }
+        }
 
         hasMovedThisTurn = false;
         // 플레이어라면 연료 리필 (Player.cs에 함수 추가 예정)

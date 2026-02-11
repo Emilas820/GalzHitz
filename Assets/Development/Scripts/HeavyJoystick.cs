@@ -10,7 +10,7 @@ public class HeavyJoystick : MonoBehaviour, IDragHandler, IPointerDownHandler, I
     [Tooltip("값이 클수록 당기기 힘들어집니다. (추천: 1.5 ~ 3.0)")]
     public float stiffness = 2.0f; 
     [Tooltip("마우스 반응 속도 (낮을수록 묵직함)")]
-    public float smoothSpeed = 15f; 
+    public float smoothSpeed = 15f;
 
     [Header("옵션")]
     public LineRenderer rubberBand;

@@ -24,6 +24,9 @@ public class UIManager : MonoBehaviour
     public GameObject skillJoystick;    // 스킬 조이스틱
     public TextMeshProUGUI modeBtnText; // 버튼 텍스트 변경용
 
+    public Image throwHandleImage; // 투척 핸들 이미지
+    public Image skillHandleImage; // 스킬 핸들 이미지
+
     [Header("유닛 스테이터스 패널")]
     public Transform playerStatusPanel; // 왼쪽 패널 (부모)
     public Transform enemyStatusPanel;  // 오른쪽 패널 (부모)
@@ -34,8 +37,6 @@ public class UIManager : MonoBehaviour
 
     [Header("이동량 게이지")]
     public Image fuelGaugeImage;
-
-    
 
     void Awake()
     {
@@ -118,6 +119,17 @@ public class UIManager : MonoBehaviour
         if (modeBtnText != null)
         {
             modeBtnText.text = isAimingMode ? "조준모드" : "이동모드";
+        }
+    }
+
+    public void UpdateHandleImage(Sprite throwHandle, Sprite skillHandle)
+    {
+        // 이미지가 비어있지 않은지 체크 (방어 코드)
+        if ((throwHandleImage != null && throwHandle != null) || (skillHandleImage != null && skillHandle != null))
+        {
+            // Image 컴포넌트의 sprite 멤버를 교체
+            throwHandleImage.sprite = throwHandle;
+            skillHandleImage.sprite = skillHandle;
         }
     }
 
